@@ -10,8 +10,8 @@ import com.mycompany.dao.inter.AbstractDAO;
 import static com.mycompany.dao.inter.AbstractDAO.connect;
 import com.mycompany.dao.inter.CountryDaoInter;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,14 +32,13 @@ public class CountryDaoImpl extends AbstractDAO implements CountryDaoInter {
       
     }
     @Override
-    public List<Country> getAllCountry(int id) {
+    public List<Country> getAllCountry() {
         List<Country> result = new ArrayList<>();
         try (Connection c = connect()) {
+       Statement stmt = c.createStatement();
 
-            PreparedStatement stmt = c.prepareStatement("select * from country where id = ?");
-
-            stmt.setInt(1, id);
-            stmt.execute();
+         
+            stmt.execute("select * from country");
             ResultSet rs = stmt.getResultSet();
 
             while (rs.next()) {

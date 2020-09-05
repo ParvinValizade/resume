@@ -12,6 +12,7 @@ import com.mycompany.dao.inter.SkillDaoInter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,38 +21,57 @@ import java.util.List;
  * @author Parvin
  */
 public class SkillDaoImpl extends AbstractDAO implements SkillDaoInter {
-
-     private Skill getSkill(ResultSet rs) throws Exception {
-
+    
+    private Skill getSkill(ResultSet rs) throws Exception {
+        
         String name = rs.getString("name");
         int id = rs.getInt("id");
-     
-        Skill skl = new Skill(id,name);
+        
+        Skill skl = new Skill(id, name);
         return skl;
-      
+        
     }
+
     @Override
-    public List<Skill> getAllSkill(int id) {
+    public List<Skill> getAllSkill() {
         List<Skill> result = new ArrayList<>();
         try (Connection c = connect()) {
-
-            PreparedStatement stmt = c.prepareStatement("select * from skill where id = ?");
-
-            stmt.setInt(1, id);
-            stmt.execute();
+            
+            Statement stmt = c.createStatement();
+            
+            stmt.execute("select * from skill");
             ResultSet rs = stmt.getResultSet();
-
+            
             while (rs.next()) {
-
+                
                 Skill skl = getSkill(rs);
                 result.add(skl);
-
+                
             }
-
+            
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         return result;
     }
-
+    
+    @Override
+    public boolean insertSkill(Skill skl) {
+        try (Connection c = connect()) {
+            
+            PreparedStatement stmt = c.prepareStatement("insert into skill(name) values(?)", Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, skl.getName());
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            
+            if (generatedKeys.next()) {
+                skl.setId(generatedKeys.getInt(1));
+            }
+            
+            return stmt.execute();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+    
 }
